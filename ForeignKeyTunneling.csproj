@@ -1,0 +1,57 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Data\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Spartez.Firebird.Embedded" Version="3.0.6.33328" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="C:\Users\tolli\.nuget\packages\spartez.firebird.embedded\3.0.6.33328\build\x64\fbclient.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="C:\Users\tolli\.nuget\packages\spartez.firebird.embedded\3.0.6.33328\build\x64\fbembed.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="C:\Users\tolli\.nuget\packages\spartez.firebird.embedded\3.0.6.33328\build\x64\ib_util.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="C:\Users\tolli\.nuget\packages\spartez.firebird.embedded\3.0.6.33328\build\x64\icudt52.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="C:\Users\tolli\.nuget\packages\spartez.firebird.embedded\3.0.6.33328\build\x64\icudt52l.dat">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="C:\Users\tolli\.nuget\packages\spartez.firebird.embedded\3.0.6.33328\build\x64\icuin52.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="C:\Users\tolli\.nuget\packages\spartez.firebird.embedded\3.0.6.33328\build\x64\icuuc52.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

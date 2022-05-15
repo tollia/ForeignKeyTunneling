@@ -1,0 +1,31 @@
+﻿@model List<System.Data.DataTable> 
+@using System.Data; 
+
+<div class="text-center">
+    @foreach(DataTable dataTable in Model)
+    {
+        <h2>@dataTable.TableName</h2> 
+ 
+        <table> 
+            <thead> 
+            <tr> 
+            @foreach (DataColumn col in dataTable.Columns)     
+            {          
+                <th>@col.ColumnName</th> 
+            }     
+            </tr> 
+            </thead>         
+            <tbody> 
+            @foreach (DataRow row in dataTable.Rows)     
+            {         
+                <tr> 
+                @foreach (DataColumn col in dataTable.Columns)         
+                {              
+                    <td>@row[col.ColumnName]</td> 
+                }         
+                </tr> 
+            }     
+            </tbody> 
+        </table>
+    }
+</div>
