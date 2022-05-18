@@ -1,9 +1,16 @@
-﻿namespace ForeignKeyTunneling.Models
+﻿using Newtonsoft.Json;
+
+namespace ForeignKeyTunneling.Models
 {
+    [JsonObject]
     public class JoinKey
     {
-        public TableColumnKey From { get; }
-        public TableColumnKey To { get; }
+        [JsonProperty]
+        public TableColumnKey From { get; set; }
+        [JsonProperty]
+        public TableColumnKey To { get; set; }
+
+        public JoinKey() { }
         public JoinKey(TableColumnKey from, TableColumnKey to)
         {
             From = from;

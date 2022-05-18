@@ -9,6 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="Spartez.Firebird.Embedded" Version="3.0.6.33328" />
   </ItemGroup>
 

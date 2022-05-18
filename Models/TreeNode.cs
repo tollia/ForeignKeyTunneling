@@ -21,21 +21,22 @@ namespace ForeignKeyTunneling.Models
         [JsonPropertyName("children")]
         public List<TreeNode> Children { get; set; }
 
-        public static List<TreeNode> TableNodeList(
+        public static List<TreeNode> GetTableNodeList(
             DbConnection connection,
             string tableName,
-            string parentPath
+            string parentPath,
+            Dictionary<TableColumnKey, TableColumnKey> auxForeignKeys
         )
         {
             List<TreeNode> nodeList = new();
-            Dictionary<TableColumnKey, TableColumnKey> foreignKeyMap = Schema.ForeignKeyMapForTable(connection, tableName);
+            Dictionary<TableColumnKey, TableColumnKey> foreignKeys = Schema.ForeignKeyMapForTable(connection, tableName);
             DataTable columnsTable = connection.GetSchema("Columns", new string[] { null, null, tableName });
             foreach (DataRow row in columnsTable.Rows)
             {
                 TableColumnKey key = new(tableName, row["COLUMN_NAME"]);
                 List<TreeNode> children =
-                    foreignKeyMap.ContainsKey(key) ?
-                        TableNodeList(connection, foreignKeyMap[key].TableName, parentPath + "." + row["COLUMN_NAME"]) :
+                    foreignKeys.ContainsKey(key) ?
+                        GetTableNodeList(connection, foreignKeys[key].TableName, parentPath + "." + row["COLUMN_NAME"], auxForeignKeys) :
                         new();
                 nodeList.Add(new TreeNode(parentPath + "." + row["COLUMN_NAME"], row["COLUMN_NAME"], children));
             }

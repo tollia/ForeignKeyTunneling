@@ -1,0 +1,48 @@
+﻿<div class="mw-100 mh-100 w-100 h-100" id="Terminal"></div>
+<script>
+    const helpText = `
+    help     This text
+    cancel   Clear buffer to cancel previous input
+    clear    Clear terminal
+    show     Show buffer
+    `;
+    const colOn = "[[;yellow;]";
+    const colOff = "]";
+const promptBegin = "[[;orange;]";
+const promptEnd = "> ]"
+
+    $(function() {
+        var buffer = [];
+        $('#Terminal').terminal(function(command, term) {
+            term.pause();
+            let tComm = command.trim();
+            switch (tComm.split(' ')[0]) {
+                case "cancel":
+                    term.set_prompt(promptBegin + promptEnd);
+                    buffer = [];
+                    break;
+                case "show":
+                    buffer.forEach(line => term.echo(colOn + line + colOff));
+                    break;
+                case "help":
+                    term.echo(helpText);
+                    break;
+                default:
+                    buffer.push(tComm);
+                    term.set_prompt(promptBegin + buffer.length + promptEnd);
+                    if (tComm.endsWith(";")) {
+                        $.post('Terminal/Execute', { command: buffer.join("\n") }).then(function(response) {
+                            term.echo(response);
+                        });
+                        term.set_prompt(promptBegin + promptEnd);
+                        buffer = [];
+                    }
+            }
+            term.resume();
+        }, {
+            greetings: '[[;yellow;]FirebirdSQL Terminal] execute when line ends with ;',
+            prompt: promptBegin + promptEnd,
+            wrap: false
+        });
+    });
+</script>

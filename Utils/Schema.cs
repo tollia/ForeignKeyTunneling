@@ -1,9 +1,11 @@
 ﻿using ForeignKeyTunneling.Models;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Linq;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace ForeignKeyTunneling.Utils
@@ -126,6 +128,7 @@ namespace ForeignKeyTunneling.Utils
             {
                 foreignKeyMap.Add(new TableColumnKey(row["TABLE_NAME"], row["COLUMN_NAME"]), new TableColumnKey(row["REFERENCED_TABLE_NAME"], row["REFERENCED_COLUMN_NAME"]));
             }
+
             return foreignKeyMap;
         }
     }

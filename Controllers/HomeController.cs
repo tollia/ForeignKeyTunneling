@@ -3,6 +3,7 @@ using ForeignKeyTunneling.Models;
 using ForeignKeyTunneling.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
@@ -15,9 +16,11 @@ namespace ForeignKeyTunneling.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private DB DB { get; init; }
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(DB db, ILogger<HomeController> logger)
         {
+            DB = db;
             _logger = logger;
         }
 
@@ -35,28 +38,63 @@ namespace ForeignKeyTunneling.Controllers
             }
         }
 
+        //Dictionary<TableColumnKey, TableColumnKey> foreignKeys = Schema.ForeignKeyMapFromTable(connection, tableName);
+        //JsonSerializerSettings jsonSettings = new JsonSerializerSettings()
+        //{
+        //    Formatting = Formatting.Indented,
+        //    ContractResolver = new DictionaryAsArrayResolver()
+        //};
+        //Dictionary<TableColumnKey, TableColumnKey> pmet = JsonConvert.DeserializeObject<Dictionary<TableColumnKey, TableColumnKey>>(temp, jsonSettings);
+        //string temp = JsonConvert.SerializeObject(foreignKeys, jsonSettings);
+
         public IActionResult Index(string tableName)
         {
-            List<TreeNode> nodeList;
-            using (FbConnection connection = new(ConnectionString))
+            using (FbConnection connection = DB.GetConnection())
             {
-                if (connection.State == ConnectionState.Closed) connection.Open();
-
-                nodeList = TreeNode.TableNodeList(connection, tableName, tableName);
+                ViewData["Tables"] = connection.GetSchema("Tables", new string[] { null, null, null, "TABLE" });
             }
-
-            ViewBag.NodeListJSON = JsonSerializer.Serialize(nodeList, new JsonSerializerOptions() { WriteIndented = true });
+            ViewBag.TableName = tableName;
             return View();
         }
 
-        public IActionResult Select(string colPathCSV)
+        public IActionResult Tree(string tableName, string auxForeignKeyJson)
+        {
+            // Setup AUX ForeignKeys if provided.
+            Dictionary<TableColumnKey, TableColumnKey> auxForeignKeys;
+            if (string.IsNullOrEmpty(auxForeignKeyJson))
+            {
+                auxForeignKeys = new();
+            }
+            else
+            {
+                JsonSerializerSettings jsonSettings = new JsonSerializerSettings()
+                {
+                    Formatting = Formatting.Indented,
+                    ContractResolver = new DictionaryAsArrayResolver()
+                };
+                auxForeignKeys = JsonConvert.DeserializeObject<Dictionary<TableColumnKey, TableColumnKey>>(auxForeignKeyJson, jsonSettings);
+            }
+
+            // Prepare Json for 
+            List<TreeNode> nodeList;
+            using (FbConnection connection = DB.GetConnection())
+            {
+                if (connection.State == ConnectionState.Closed) connection.Open();
+                nodeList = TreeNode.GetTableNodeList(connection, tableName, tableName, auxForeignKeys);
+            }
+            ViewBag.NodeListJSON = System.Text.Json.JsonSerializer.Serialize(nodeList, new JsonSerializerOptions() { WriteIndented = true });
+            return View();
+        }
+
+
+        public IActionResult Select(string colPathCSV, int? maxRecords)
         {
             List<DataTable> tableList = new();
-            using (FbConnection connection = new(ConnectionString))
+            using (FbConnection connection = DB.GetConnection())
             {
                 if (connection.State == ConnectionState.Closed) connection.Open();
 
-                string select = Schema.GenerateSelect(connection, colPathCSV.Split(",").ToList<string>(), 10);
+                string select = Schema.GenerateSelect(connection, colPathCSV.Split(",").ToList<string>(), maxRecords);
                 DataTable dt = new DataTable("FK_TUNNELING_RESULT");
                 FbDataAdapter da = new FbDataAdapter(select, connection);
                 da.Fill(dt);
@@ -66,10 +104,10 @@ namespace ForeignKeyTunneling.Controllers
             return View(tableList);
         }
 
-            public IActionResult Test(string tableName = null)
+            public IActionResult MetaData(string tableName = null)
         {
             List<DataTable> tableList = new();
-            using (var connection = new FbConnection(ConnectionString))
+            using (FbConnection connection = DB.GetConnection())
             {
                 if (connection.State == ConnectionState.Closed) connection.Open();
 
@@ -77,6 +115,8 @@ namespace ForeignKeyTunneling.Controllers
                 tableList.Add(connection.GetSchema("Tables", new string[] { null, null, tableName, "TABLE" }));
                 tableList.Add(connection.GetSchema("PrimaryKeys", new string[] { null, null, tableName }));
                 tableList.Add(connection.GetSchema("Columns", new string[] { null, null, tableName }));
+                tableList.Add(connection.GetSchema("Views", new string[] { null, null, tableName }));
+                tableList.Add(connection.GetSchema("ViewColumns", new string[] { null, null, tableName }));
                 tableList.Add(connection.GetSchema("Indexes", new string[] { null, null, tableName }));
                 tableList.Add(connection.GetSchema("IndexColumns", new string[] { null, null, tableName }));
                 tableList.Add(connection.GetSchema("ForeignKeys", new string[] { null, null, tableName }));

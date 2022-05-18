@@ -1,12 +1,19 @@
-﻿namespace ForeignKeyTunneling.Models
+﻿using Newtonsoft.Json;
+
+namespace ForeignKeyTunneling.Models
 {
+    [JsonObject]
     public class TableColumnKey
     {
-        public string TableName { get; }
-        public string ColumnName { get; }
+        [JsonProperty]
+        public string TableName { get; set; }
+        [JsonProperty]
+        public string ColumnName { get; set; }
         // This does not take part in Equals and HashCode evaluation. It defaults to TableName.
+        [JsonProperty]
         public string TableAlias { get; set; }
 
+        public TableColumnKey() { }
         public TableColumnKey(TableColumnKey key) : this(key.TableName, key.ColumnName) { }
 
         public TableColumnKey(object tableName, object columnName) : this(tableName.ToString(), columnName.ToString()) { }
@@ -28,10 +35,17 @@
         {
             return TableName.GetHashCode() ^ ColumnName.GetHashCode();
         }
-        public override string ToString()
+
+        public bool ShouldSerializeTableAlias()
         {
-            string aliasString = TableAlias == TableName ? "" : $"~{TableAlias}";
-            return $"{TableName}{aliasString}({ColumnName})";
+            // don't serialize the Manager property if an employee is their own manager
+            return (TableName != TableAlias);
         }
+
+        //public override string ToString()
+        //{
+        //    string aliasString = TableAlias == TableName ? "" : $"~{TableAlias}";
+        //    return $"{TableName}{aliasString}({ColumnName})";
+        //}
     }
 }
